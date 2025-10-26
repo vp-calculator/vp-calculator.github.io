@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VALORANT VP Price Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1923 0%, #1a2332 50%, #0f1923 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #ff4655;
+            text-shadow: 0 0 20px rgba(255, 70, 85, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #ece8e1;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .controls select {
+            padding: 10px 20px;
+            background: rgba(26, 35, 50, 0.8);
+            border: 2px solid #ff4655;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .controls select:hover {
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 70, 85, 0.3);
+        }
+
+        .controls select:focus {
+            outline: none;
+            border-color: #ff4655;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(26, 35, 50, 0.8);
+            border: 2px solid #ff4655;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(255, 70, 85, 0.2);
+        }
+
+        .card h2 {
+            color: #ff4655;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ece8e1;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 25, 35, 0.8);
+            border: 2px solid #53212b;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff4655;
+            box-shadow: 0 0 15px rgba(255, 70, 85, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff4655 0%, #d63447 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 70, 85, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 70, 85, 0.1);
+            border: 2px solid #ff4655;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h3 {
+            font-size: 2em;
+            color: #ff4655;
+            margin-bottom: 10px;
+        }
+
+        .result p {
+            font-size: 1.1em;
+            color: #ece8e1;
+        }
+
+        .price-table {
+            margin-top: 20px;
+        }
+
+        .price-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .price-table th, .price-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 70, 85, 0.2);
+        }
+
+        .price-table th {
+            background: rgba(255, 70, 85, 0.2);
+            color: #ff4655;
+            font-weight: bold;
+        }
+
+        .price-table tr:hover {
+            background: rgba(255, 70, 85, 0.1);
+        }
+
+        .bonus {
+            color: #00ff88;
+            font-size: 0.9em;
+        }
+
+        .admin-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(26, 35, 50, 0.8);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .admin-section.show {
+            display: block;
+        }
+
+        .admin-section h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .admin-toggle {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .admin-toggle button {
+            padding: 10px 30px;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            color: #ffd700;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .admin-toggle button:hover {
+            background: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .currency-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .currency-tab {
+            flex: 1;
+            padding: 10px;
+            background: rgba(15, 25, 35, 0.8);
+            border: 2px solid #53212b;
+            border-radius: 8px;
+            color: #ece8e1;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .currency-tab.active {
+            background: #ff4655;
+            border-color: #ff4655;
+            color: #fff;
+        }
+
+        .update-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 70, 85, 0.1);
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #ece8e1;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .currency-tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="mainTitle">⚡ VALORANT VP FİYAT HESAPLAYICI</h1>
+            <p id="mainSubtitle">Valorant Point fiyatlarını güncel kurla hesaplayın</p>
+        </div>
+
+        <div class="controls">
+            <select id="languageSelect" onchange="changeLanguage()">
+                <option value="tr">🇹🇷 Türkçe</option>
+                <option value="en">🇬🇧 English</option>
+            </select>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2 id="calculateTitle">💰 VP Hesapla</h2>
+                
+                <div class="currency-tabs">
+                    <div class="currency-tab active" onclick="selectCurrency('TRY', this)">
+                        🇹🇷 TRY (₺)
+                    </div>
+                    <div class="currency-tab" onclick="selectCurrency('USD', this)">
+                        🇺🇸 USD ($)
+                    </div>
+                    <div class="currency-tab" onclick="selectCurrency('EUR', this)">
+                        🇪🇺 EUR (€)
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="vpAmount" id="vpAmountLabel">Kaç VP?</label>
+                    <input type="number" id="vpAmount" placeholder="Örn: 475" min="1">
+                </div>
+                <button class="btn" onclick="calculatePrice()" id="calculateBtn">Hesapla</button>
+                
+                <div class="result" id="result">
+                    <h3 id="resultPrice"></h3>
+                    <p id="resultDetail"></p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 id="packagesTitle">📊 Paket Fiyatları</h2>
+                <div class="price-table">
+                    <table id="priceTable">
+                        <thead>
+                            <tr>
+                                <th id="vpHeader">VP Miktarı</th>
+                                <th id="priceHeader">Fiyat</th>
+                            </tr>
+                        </thead>
+                        <tbody id="priceTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-toggle">
+            <button onclick="showAdminLogin()" id="adminBtn">🔐 Admin Girişi</button>
+        </div>
+
+        <div class="admin-section" id="adminSection">
+            <div id="loginForm" class="login-form">
+                <h2 id="loginTitle">🔐 Admin Girişi</h2>
+                <div class="input-group">
+                    <label for="adminPassword" id="passwordLabel">Şifre</label>
+                    <input type="password" id="adminPassword" placeholder="••••••••">
+                </div>
+                <button class="btn" style="background: linear-gradient(135deg, #ffd700 0%, #f0a500 100%);" onclick="login()" id="loginBtn">
+                    Giriş Yap
+                </button>
+            </div>
+
+            <div id="adminPanel" style="display: none;">
+                <h2 id="adminPanelTitle">🔧 Admin Panel - Fiyat Güncelleme</h2>
+                <p style="margin-bottom: 20px; color: #ece8e1;" id="adminDescription">
+                    VP paket fiyatlarını güncelleyin (KDV dahil fiyatlar)
+                </p>
+
+                <h3 style="color: #ffd700; margin: 20px 0;">TRY (₺) Fiyatları</h3>
+                <div class="input-group">
+                    <label>475 VP</label>
+                    <input type="number" id="price_try_475" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>1.050 VP</label>
+                    <input type="number" id="price_try_1050" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>2.200 VP</label>
+                    <input type="number" id="price_try_2200" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>3.975 VP</label>
+                    <input type="number" id="price_try_3975" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>5.950 VP</label>
+                    <input type="number" id="price_try_5950" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>12.475 VP</label>
+                    <input type="number" id="price_try_12475" step="0.01" min="0">
+                </div>
+
+                <h3 style="color: #ffd700; margin: 20px 0;">USD ($) Fiyatları</h3>
+                <div class="input-group">
+                    <label>475 VP</label>
+                    <input type="number" id="price_usd_475" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>1.050 VP</label>
+                    <input type="number" id="price_usd_1050" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>2.200 VP</label>
+                    <input type="number" id="price_usd_2200" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>3.975 VP</label>
+                    <input type="number" id="price_usd_3975" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>5.950 VP</label>
+                    <input type="number" id="price_usd_5950" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>12.475 VP</label>
+                    <input type="number" id="price_usd_12475" step="0.01" min="0">
+                </div>
+
+                <h3 style="color: #ffd700; margin: 20px 0;">EUR (€) Fiyatları</h3>
+                <div class="input-group">
+                    <label>475 VP</label>
+                    <input type="number" id="price_eur_475" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>1.050 VP</label>
+                    <input type="number" id="price_eur_1050" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>2.200 VP</label>
+                    <input type="number" id="price_eur_2200" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>3.975 VP</label>
+                    <input type="number" id="price_eur_3975" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>5.950 VP</label>
+                    <input type="number" id="price_eur_5950" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label>12.475 VP</label>
+                    <input type="number" id="price_eur_12475" step="0.01" min="0">
+                </div>
+
+                <button class="btn" style="background: linear-gradient(135deg, #ffd700 0%, #f0a500 100%);" onclick="updatePrices()" id="updateBtn">
+                    Fiyatları Güncelle
+                </button>
+
+                <button class="btn" style="background: linear-gradient(135deg, #ff4655 0%, #d63447 100%); margin-top: 10px;" onclick="logout()" id="logoutBtn">
+                    Çıkış Yap
+                </button>
+
+                <div class="update-info" id="updateInfo">
+                    Son güncelleme: Henüz güncelleme yapılmadı
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Varsayılan şifre (Güvenlik için değiştirin!)
+        const ADMIN_PASSWORD = "valorant2024";
+
+        // Dil çevirileri
+        const translations = {
+            tr: {
+                mainTitle: "⚡ VALORANT VP FİYAT HESAPLAYICI",
+                mainSubtitle: "Valorant Point fiyatlarını güncel kurla hesaplayın",
+                calculateTitle: "💰 VP Hesapla",
+                vpAmountLabel: "Kaç VP?",
+                calculateBtn: "Hesapla",
+                packagesTitle: "📊 Paket Fiyatları",
+                vpHeader: "VP Miktarı",
+                priceHeader: "Fiyat",
+                adminBtn: "🔐 Admin Girişi",
+                loginTitle: "🔐 Admin Girişi",
+                passwordLabel: "Şifre",
+                loginBtn: "Giriş Yap",
+                adminPanelTitle: "🔧 Admin Panel - Fiyat Güncelleme",
+                adminDescription: "VP paket fiyatlarını güncelleyin (KDV dahil fiyatlar)",
+                updateBtn: "Fiyatları Güncelle",
+                logoutBtn: "Çıkış Yap",
+                bonus: "Bonus",
+                lastUpdate: "Son güncelleme",
+                noUpdate: "Henüz güncelleme yapılmadı",
+                invalidAmount: "Lütfen geçerli bir VP miktarı girin!",
+                wrongPassword: "Hatalı şifre!",
+                pricesUpdated: "Fiyatlar başarıyla güncellendi!",
+                resultDetail: "için ödemeniz gereken tutar"
+            },
+            en: {
+                mainTitle: "⚡ VALORANT VP PRICE CALCULATOR",
+                mainSubtitle: "Calculate Valorant Point prices with current rates",
+                calculateTitle: "💰 Calculate VP",
+                vpAmountLabel: "How many VP?",
+                calculateBtn: "Calculate",
+                packagesTitle: "📊 Package Prices",
+                vpHeader: "VP Amount",
+                priceHeader: "Price",
+                adminBtn: "🔐 Admin Login",
+                loginTitle: "🔐 Admin Login",
+                passwordLabel: "Password",
+                loginBtn: "Login",
+                adminPanelTitle: "🔧 Admin Panel - Price Update",
+                adminDescription: "Update VP package prices (VAT included)",
+                updateBtn: "Update Prices",
+                logoutBtn: "Logout",
+                bonus: "Bonus",
+                lastUpdate: "Last update",
+                noUpdate: "No updates yet",
+                invalidAmount: "Please enter a valid VP amount!",
+                wrongPassword: "Wrong password!",
+                pricesUpdated: "Prices updated successfully!",
+                resultDetail: "total amount to pay"
+            }
+        };
+
+        let currentLang = 'tr';
+        let currentCurrency = 'TRY';
+        let isLoggedIn = false;
+
+        // Fiyat verileri (Resimdeki değerler)
+        let priceData = {
+            TRY: {
+                475: 120,
+                1050: 250,
+                2200: 500,
+                3975: 850,
+                5950: 1230,
+                12475: 2450
+            },
+            USD: {
+                475: 5,
+                1050: 10,
+                2200: 20,
+                3975: 35,
+                5950: 50,
+                12475: 100
+            },
+            EUR: {
+                475: 5,
+                1050: 10,
+                2200: 20,
+                3975: 35,
+                5950: 50,
+                12475: 100
+            },
+            lastUpdate: null
+        };
+
+        // VP paketleri (Bonus bilgileri ile)
+        const vpPackages = [
+            { totalVp: 475, bonus: 0 },
+            { totalVp: 1050, bonus: 100 },
+            { totalVp: 2200, bonus: 300 },
+            { totalVp: 3975, bonus: 650 },
+            { totalVp: 5950, bonus: 1200 },
+            { totalVp: 12475, bonus: 2950 }
+        ];
+
+        // Sayfa yüklendiğinde
+        window.onload = function() {
+            loadPriceData();
+            updatePriceTable();
+            changeLanguage();
+            
+            // Enter tuşu ile işlem yapma
+            document.getElementById('vpAmount').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') calculatePrice();
+            });
+
+            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') login();
+            });
+        };
+
+        // LocalStorage'dan veri yükleme
+        function loadPriceData() {
+            const stored = localStorage.getItem('vpPriceData');
+            if (stored) {
+                const loaded = JSON.parse(stored);
+                // Eksik para birimlerini kontrol et ve varsayılan değerleri ata
+                if (!loaded.TRY) loaded.TRY = priceData.TRY;
+                if (!loaded.USD) loaded.USD = priceData.USD;
+                if (!loaded.EUR) loaded.EUR = priceData.EUR;
+                priceData = loaded;
+                updateUpdateInfo();
+            }
+        }
+
+        // Para birimi seçimi
+        function selectCurrency(currency, element) {
+            currentCurrency = currency;
+            const tabs = document.querySelectorAll('.currency-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            updatePriceTable();
+        }
+
+        // Dil değiştirme
+        function changeLanguage() {
+            currentLang = document.getElementById('languageSelect').value;
+            const t = translations[currentLang];
+
+            // Tüm metinleri güncelle
+            document.getElementById('mainTitle').textContent = t.mainTitle;
+            document.getElementById('mainSubtitle').textContent = t.mainSubtitle;
+            document.getElementById('calculateTitle').textContent = t.calculateTitle;
+            document.getElementById('vpAmountLabel').textContent = t.vpAmountLabel;
+            document.getElementById('calculateBtn').textContent = t.calculateBtn;
+            document.getElementById('packagesTitle').textContent = t.packagesTitle;
+            document.getElementById('vpHeader').textContent = t.vpHeader;
+            document.getElementById('priceHeader').textContent = t.priceHeader;
+            document.getElementById('adminBtn').textContent = t.adminBtn;
+            document.getElementById('loginTitle').textContent = t.loginTitle;
+            document.getElementById('passwordLabel').textContent = t.passwordLabel;
+            document.getElementById('loginBtn').textContent = t.loginBtn;
+            document.getElementById('adminPanelTitle').textContent = t.adminPanelTitle;
+            document.getElementById('adminDescription').textContent = t.adminDescription;
+            document.getElementById('updateBtn').textContent = t.updateBtn;
+            document.getElementById('logoutBtn').textContent = t.logoutBtn;
+
+            updateUpdateInfo();
+            updatePriceTable();
+        }
+
+        // Fiyat tablosunu güncelle
+        function updatePriceTable() {
+            const tbody = document.getElementById('priceTableBody');
+            tbody.innerHTML = '';
+
+            const currencySymbol = currentCurrency === 'TRY' ? '₺' : currentCurrency === 'USD' ? '$' : '€';
+            const t = translations[currentLang];
+
+            vpPackages.forEach(pkg => {
+                const price = priceData[currentCurrency][pkg.totalVp].toFixed(2);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        ${pkg.totalVp.toLocaleString()} VP
+                        ${pkg.bonus > 0 ? `<span class="bonus">(+${pkg.bonus} ${t.bonus})</span>` : ''}
+                    </td>
+                    <td><strong>${price} ${currencySymbol}</strong></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // VP fiyatı hesaplama
+        function calculatePrice() {
+            const vpAmount = parseFloat(document.getElementById('vpAmount').value);
+            const t = translations[currentLang];
+            
+            if (!vpAmount || vpAmount <= 0) {
+                alert(t.invalidAmount);
+                return;
+            }
+
+            // Paket fiyatlarından VP başına oran hesapla
+            const packages = Object.keys(priceData[currentCurrency])
+                .map(vp => ({
+                    vp: parseInt(vp),
+                    price: priceData[currentCurrency][vp]
+                }))
+                .sort((a, b) => a.vp - b.vp);
+
+            let closestPackage = packages[0];
+            let pricePerVP = packages[0].price / packages[0].vp;
+
+            for (let pkg of packages) {
+                if (vpAmount >= pkg.vp) {
+                    closestPackage = pkg;
+                    pricePerVP = pkg.price / pkg.vp;
+                } else {
+                    break;
+                }
+            }
+
+            // Girilen VP miktarını bu oranla çarp
+            const totalPrice = (vpAmount * pricePerVP).toFixed(2);
+            const currencySymbol = currentCurrency === 'TRY' ? '₺' : currentCurrency === 'USD' ? '$' : '€';
+            
+            const result = document.getElementById('result');
+            const resultPrice = document.getElementById('resultPrice');
+            const resultDetail = document.getElementById('resultDetail');
+
+            resultPrice.textContent = `${totalPrice} ${currencySymbol}`;
+            resultDetail.textContent = `${vpAmount} VP ${t.resultDetail}`;
+            
+            result.classList.add('show');
+        }
+
+        // Admin girişi göster
+        function showAdminLogin() {
+            const adminSection = document.getElementById('adminSection');
+            adminSection.classList.toggle('show');
+            
+            // Eğer zaten giriş yapılmışsa admin panelini göster
+            if (isLoggedIn) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                loadAdminPrices();
+            } else {
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('adminPanel').style.display = 'none';
+            }
+        }
+
+        // Admin girişi
+        function login() {
+            const password = document.getElementById('adminPassword').value;
+            const t = translations[currentLang];
+
+            if (password === ADMIN_PASSWORD) {
+                isLoggedIn = true;
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('adminPassword').value = '';
+                loadAdminPrices();
+            } else {
+                alert(t.wrongPassword);
+            }
+        }
+
+        // Çıkış yap
+        function logout() {
+            isLoggedIn = false;
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('adminSection').classList.remove('show');
+        }
+
+        // Admin fiyatlarını yükle
+        function loadAdminPrices() {
+            const currencies = ['try', 'usd', 'eur'];
+            const vps = [475, 1050, 2200, 3975, 5950, 12475];
+
+            currencies.forEach(curr => {
+                vps.forEach(vp => {
+                    const inputId = `price_${curr}_${vp}`;
+                    const value = priceData[curr.toUpperCase()][vp];
+                    document.getElementById(inputId).value = value;
+                });
+            });
+        }
+
+        // Fiyatları güncelle
+        function updatePrices() {
+            const t = translations[currentLang];
+            const currencies = ['try', 'usd', 'eur'];
+            const vps = [475, 1050, 2200, 3975, 5950, 12475];
+
+            currencies.forEach(curr => {
+                vps.forEach(vp => {
+                    const inputId = `price_${curr}_${vp}`;
+                    const value = parseFloat(document.getElementById(inputId).value);
+                    if (value && value > 0) {
+                        priceData[curr.toUpperCase()][vp] = value;
+                    }
+                });
+            });
+
+            priceData.lastUpdate = new Date().toLocaleString(currentLang === 'tr' ? 'tr-TR' : 'en-US');
+            localStorage.setItem('vpPriceData', JSON.stringify(priceData));
+
+            updatePriceTable();
+            updateUpdateInfo();
+
+            alert(t.pricesUpdated);
+        }
+
+        // Güncelleme bilgisini göster
+        function updateUpdateInfo() {
+            const info = document.getElementById('updateInfo');
+            const t = translations[currentLang];
+            
+            if (priceData.lastUpdate) {
+                info.textContent = `${t.lastUpdate}: ${priceData.lastUpdate}`;
+            } else {
+                info.textContent = `${t.lastUpdate}: ${t.noUpdate}`;
+            }
+        }
+    </script>
+</body>
+</html>
